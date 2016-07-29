@@ -1,0 +1,28 @@
+{
+  "name": "fee-fi-fo-fum",
+  "version": "0.1.0",
+  "description": "Simple Promise-based Node.js client for Beanstalkd",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "js-yaml": "^3.6.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.1.1",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.12.0",
+    "eslint-plugin-jsx-a11y": "^2.0.1",
+    "eslint-plugin-react": "^5.2.2",
+    "expect": "^1.20.2",
+    "mocha": "^2.5.3"
+  },
+  "scripts": {
+    "lint": "eslint lib test index.js",
+    "test": "nyc mocha -t 8000 -R spec test/",
+    "travis": "npm run lint && npm test"
+  },
+  "author": "Nick Bottomley (github.com/nickb1080)",
+  "license": "MIT"
+}
