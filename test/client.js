@@ -2,7 +2,6 @@ const BeanstalkdClient = require("../");
 
 const expect    = require("expect");
 const fs        = require("fs");
-// const semver    = require("semver");
 
 const host = "127.0.0.1";
 const port = 11300;
@@ -12,7 +11,6 @@ const expectEqual = x => r => expect(x).toEqual(r);
 
 describe("BeanstalkdClient", function () {
   let producer, consumer, testjobid;
-  var version;
 
   new BeanstalkdClient(host);
 
@@ -21,20 +19,20 @@ describe("BeanstalkdClient", function () {
     consumer = new BeanstalkdClient(host, port);
   });
 
-  describe("#FiveBeansClient()", function () {
+  describe("constructor()", function () {
     it("creates a client with the passed-in options", function () {
       expect(producer.host).toEqual(host);
       expect(producer.port).toEqual(port);
     });
   });
 
-  describe("#connect()", function () {
+  describe("connect()", function () {
     it("creates and saves a connection", function () {
       return producer.connect().then(() => expect(producer._stream).toExist())
     });
   });
 
-  describe("job producer:", function () {
+  describe("producer:", function () {
     it("#use() connects to a specific tube", function () {
       return producer.use(tube)
         .then(expectEqual(tube))
@@ -60,7 +58,7 @@ describe("BeanstalkdClient", function () {
     });
   });
 
-  describe("job consumer:", function () {
+  describe("consumer:", function () {
     it("#watch() watches a tube", function () {
       return consumer.connect()
         .then(() => consumer.watch(tube))
@@ -98,7 +96,7 @@ describe("BeanstalkdClient", function () {
     });
 
     it("consumer can run statsJob() while a job is reserved", function () {
-      return consumer.reserve().then(([jobid, payload]) => {
+      return consumer.reserve().then(([jobid]) => {
         return consumer.statsJob(jobid).then(resp => {
           expect(resp.id).toEqual(jobid);
           expect(resp.state).toEqual("reserved");
@@ -125,7 +123,6 @@ describe("BeanstalkdClient", function () {
 
     it("jobs can contain binary data", function () {
       var payload = fs.readFileSync("./test/test.png");
-      var ptr = 0;
 
       return producer.put(0, 0, 60, payload).then(jobid => {
         expect(jobid).toExist();
@@ -158,7 +155,7 @@ describe("BeanstalkdClient", function () {
     });
 
     it("#peekDelayed() returns data for a delayed job", function () {
-      return producer.peekDelayed().then(([jobid, payload]) => {
+      return producer.peekDelayed().then(([jobid]) => {
         expect(jobid).toEqual(testjobid);
       });
     });
@@ -166,13 +163,13 @@ describe("BeanstalkdClient", function () {
     it("#bury() buries a job (> 1sec expected)", function () {
       // this takes a second because of the minumum delay enforced by release() above
       this.timeout(3000);
-      return consumer.reserve().then(([jobid, payload]) => {
+      return consumer.reserve().then(([jobid]) => {
         return consumer.bury(jobid, BeanstalkdClient.LOWEST_PRIORITY)
       });
     });
 
     it("#peekBuried() returns data for a buried job", function () {
-      return producer.peekBuried().then(([jobid, payload]) => {
+      return producer.peekBuried().then(([jobid]) => {
         expect(jobid).toEqual(testjobid);
       });
     });
@@ -183,17 +180,8 @@ describe("BeanstalkdClient", function () {
       });
     });
 
-    xit("#kickJob() kicks a specific job id", function () {
-      // Skip the test if the version of beanstalkd doesn"t have this command.
-      // Beanstalkd does not have semver-compliant version numbers, however.
-      if (version.match(/\d+\.\d+\.\d+\.\d+/)) {
-        version = version.replace(/\.\d+$/, "");
-      }
-
-      if (!semver.satisfies(version, ">= 1.8.0")) {
-        return;
-      }
-
+    // NOTE -- versions of beanstalkd before 1.8 don't have kickJob
+    it("#kickJob() kicks a specific job id", function () {
       return consumer.reserve().then(([jobid, payload]) => {
         return consumer.bury(testjobid, BeanstalkdClient.LOWEST_PRIORITY).then(() => {
           return producer.kickJob(testjobid);
