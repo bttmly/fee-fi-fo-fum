@@ -3,8 +3,6 @@ const BeanstalkdClient = require("../");
 const expect    = require("expect");
 const fs        = require("fs");
 
-const host = "127.0.0.1";
-const port = 11300;
 const tube = "testtube";
 
 const expectEqual = x => r => expect(x).toEqual(r);
@@ -12,17 +10,15 @@ const expectEqual = x => r => expect(x).toEqual(r);
 describe("BeanstalkdClient", function () {
   let producer, consumer, testjobid;
 
-  new BeanstalkdClient(host);
-
   before(function () {
-    producer = new BeanstalkdClient(host);
-    consumer = new BeanstalkdClient(host, port);
+    producer = new BeanstalkdClient();
+    consumer = new BeanstalkdClient();
   });
 
   describe("constructor()", function () {
     it("creates a client with the passed-in options", function () {
-      expect(producer.host).toEqual(host);
-      expect(producer.port).toEqual(port);
+      expect(producer.host).toEqual("127.0.0.1");
+      expect(producer.port).toEqual(11300);
     });
   });
 
