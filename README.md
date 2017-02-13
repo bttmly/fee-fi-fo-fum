@@ -1,10 +1,18 @@
 # fee-fi-fo-fum
 
-This is an ES6 port/rewrite of the [fivebeans client](https://github.com/ceejbot/fivebeans/blob/master/lib/client.js). Refer to the docs there, this module has parity with the client, with the caveat that each method returns a promise rather than taking a callback.
+This is an ES6 port/rewrite of the [fivebeans client](https://github.com/ceejbot/fivebeans/blob/master/lib/client.js). Refer to the docs there, this module has parity with the client, with two major differences:
+
+- Each method returns a promise rather than accepting a callback. Since promises can only have a single resolution value, commands that return two values (like `reserve` and `peek`) will resolve with a two-value array:
+
+```js
+client.reserve().then(([jobId, payload]) => /* ... */);
+```
+
+- Methods names are camel-cased versions of the snake-cased Beanstalk commands, since camel-casing is idiomatic in JavaScript.
 
 You can also avoid using the connect event listener since `connect()` returns a promise:
 
-```
+```js
 const Beanstalk = require("fee-fi-fo-fum");
 const client = new Beanstalk();
 client.connect().then(() => /* connected now ... */ );
